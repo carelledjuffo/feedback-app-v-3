@@ -17,15 +17,6 @@
         <div class="modal-body">
           <form class="form-form">
             <div class="form-group">
-              <label for="commentTitle">Name</label>
-              <input
-                  type="text"
-                  class="form-control"
-                  id="commentUser"
-                  v-model="data.name"
-              />
-            </div>
-            <div class="form-group">
               <label for="commentTitle">Title</label>
               <input
                   type="text"
@@ -68,35 +59,42 @@
 <script setup>
 import { reactive } from "vue";
 import { useStore } from "../store/store";
+import { timestamp } from "../firebase/init";
 
 const store = useStore();
 
-
 const data = reactive({
-  name: "",
   title: "",
   category: "",
   description: "",
   categoryList: store.categoryList,
-  id: store.feedbackList[store.feedbackList.length -1].id + 1,
 });
+
 function saveFeedback() {
   data.category = data.category ? data.category : 'Everyone';
-  let feedback = {
-    id: data.id,
-    name: data.name,
-    title: data.title,
-    category: data.category,
-    description: data.description,
-    upvote: 0,
-    commentList: [],
-  };
-  store.addFeedback(feedback);
-  clear();
+
+  store.getFeedbackId().then((querySnapshot) => {
+    let currentFeedbackId  = querySnapshot.docs[0].data().id;
+    let feedback_idDocId = querySnapshot.docs[0].id;
+    let feedback = {
+      id: currentFeedbackId,
+      name: localStorage.getItem('name'),
+      email: localStorage.getItem('email'),
+      title: data.title,
+      category: data.category,
+      description: data.description,
+      upvote: 0,
+      commentList: [],
+      createdAt: timestamp()
+    };
+    store.addFeedback(feedback);
+    store.incrementFeedbackId(feedback_idDocId, currentFeedbackId)
+    clear();
+  })
+
 }
 
 function clear() {
-  event.preventDefault();
   data.name = '';
   data.title = '';
   data.category = '';
@@ -156,7 +154,7 @@ select option:hover {
     display: flex;
     flex-flow: row;
     margin-top: 0px;
-    margin-bottom: 0px;
+    margin-bottom: 1em;
     padding-bottom: 7px;
   }
   .add-btn:before {

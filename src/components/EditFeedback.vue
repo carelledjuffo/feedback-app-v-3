@@ -74,7 +74,7 @@ function saveChanges() {
   validation();
   if(data.title && data.category && data.description) {
     let editData = {
-      id: props.feedback.id,
+      id: props.feedback.docId,
       title: data.title,
       category: data.category,
       description: data.description

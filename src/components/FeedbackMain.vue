@@ -1,4 +1,3 @@
-
 <template>
   <div class="main-content">
     <div class="comment-main-display">
@@ -23,6 +22,14 @@
           <input v-model="data.searchingWord" @mousedown="data.classify=6" placeholder="search">
         </div>
         <AddFeedback class="add-btn-mobile">Add</AddFeedback>
+        <div>
+          <button class="btn btn-log-out" @click="logOut">
+            <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="red" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
+              <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
 
@@ -49,11 +56,21 @@
               <div class="search-input">
                 <input v-model="data.searchingWord" @mousedown="data.classify=6" placeholder="search">
               </div>
-              <AddFeedback >Add</AddFeedback>
+              <div class="add-and-logout">
+                <AddFeedback >Add</AddFeedback>
+                <div>
+                  <button class="btn btn-log-out" @click="logOut">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="red" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
+                      <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
           <nav class="navbar navbar-dark bg-dark">
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler"  type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
             </button>
             <p class="comment-amount">{{ sortedList.length }} Suggestions</p>
@@ -68,8 +85,8 @@
       >
         <FeedbackDisplay :feedback="feedback"></FeedbackDisplay>
       </div>
-      <Comment :feedback="data.modalData" />
-      <DeleteFeedback :id="data.modalData.id"></DeleteFeedback>
+      <Comment :feedback="data.modalData"/>
+      <DeleteFeedback :docId="data.modalData.docId"></DeleteFeedback>
       <EditFeedback :feedback="data.modalData"></EditFeedback>
     </div>
   </div>
@@ -81,20 +98,26 @@ import FeedbackDisplay from "./FeedbackDisplay";
 import Comment from "./Comment";
 import DeleteFeedback from "./DeleteFeedback";
 import EditFeedback from "./EditFeedback";
+import router from "../router";
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 import { useStore } from "../store/store";
 import { reactive, computed} from "vue";
 
 
 const store = useStore();
+/* initialize store*/
+if(!store.feedbackList.length) {
+  store.getAllFeedbacks();
+}
 
 const data = reactive({
   classify: 1,
   modalData: {},
   category: '',
   fbl: store.feedbackList,
-  searchingWord: ''
+  searchingWord: '',
 })
-
 const sortingMessage = computed(() => {
   if(data.classify === 1) {
     return 'Most Upvotes'
@@ -116,7 +139,6 @@ const sortingMessage = computed(() => {
     return 'Searching...'
   }
 })
-
 const sortedList = computed(() => {
   if(data.classify == 1) {
     return sortByVotes('dsc');
@@ -139,20 +161,14 @@ const searchData = computed(() => {
     return feedback.title.toLowerCase().includes(data.searchingWord.toLowerCase());
   })
 })
-
-
 const isMobile = computed(() => {
- return  ( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
+  return window.innerWidth <= 700;
 })
-
 function setModalData(feedback) {
   data.modalData = feedback;
 }
-
-
 function sortByVotes(sortingMethod) {
   let tempList = [...store.feedbackList];
-
   tempList.sort(function (feedbackA, feedbackB) {
     if(sortingMethod == 'asc') {
       return feedbackA.upvote - feedbackB.upvote ;
@@ -162,7 +178,6 @@ function sortByVotes(sortingMethod) {
   });
   return tempList;
 }
-
 function sortByComment(sortingMethod) {
   let tempList = [...store.feedbackList]
   tempList.sort(function (feedbackA, feedbackB) {
@@ -175,21 +190,26 @@ function sortByComment(sortingMethod) {
   console.log(sortingMessage)
   return tempList;
 }
-
 function sortByCategory(category) {
   let listByCategory = sortedList.value.filter((feedback) => {
     return feedback.category.toLocaleLowerCase() === category.toLocaleLowerCase();
   })
   return  listByCategory;
 }
-
-
+function logOut() {
+ firebase.auth().signOut().then(() => {
+   console.log('user signed out');
+   localStorage.setItem('isLoggedIn', 'false')
+   router.push('/');
+ }).catch((error) => {
+   console.log(error)
+ })
+}
 </script>
 
 <style scoped>
 #app {
 }
-
 .comment-header {
   height: 80px;
   min-width: 100%;
@@ -213,7 +233,6 @@ function sortByCategory(category) {
 .comment-amount {
   font-weight: 630;
 }
-
 .comment-header > p {
   font-size: 1em;
   align-self: center;
@@ -237,7 +256,6 @@ function sortByCategory(category) {
   margin-left: 20%;
   margin-right: 20%;
 }
-
 .dropdown-toggle::after:active {
   transition: transform 1s ease-in;
   transform: rotateX(180deg);
@@ -263,14 +281,21 @@ function sortByCategory(category) {
   padding-left: 0.5em;
   background: #f2f4ff;
 }
-
+.add-and-logout {
+  display: flex;
+  justify-content: space-between;
+}
+.btn-log-out {
+  margin-top: 0.7em;
+}
 /**************** mobile ****************/
-
 .bg-dark {
   background: #3a4374 !important;
   color: white;
 }
-
+.btn {
+  box-shadow: none;
+}
 @media only screen and (max-width: 1200px) {
   .main-content {
     margin-left: 10%;
@@ -306,6 +331,8 @@ function sortByCategory(category) {
     margin-top: 0em;
     margin-bottom: .5em;
   }
-
+  .btn-log-out {
+    margin-top: -0.2em;
+  }
 }
 </style>

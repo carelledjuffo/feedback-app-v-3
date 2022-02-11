@@ -1,147 +1,182 @@
 import { defineStore } from 'pinia'
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore'
+import firebase from '../firebase/init'
+
+
+const db = firebase.firestore();
+
 
 // useStore could be anything like useUser, useCart
 // the first argument is a unique id of the store across your application
 export const useStore = defineStore('main', {
     // arrow function recommended for full type inference
     state: () => ({
-        feedbackList: [
-            {
-                id: 0,
-                name: "Kevin",
-                title: "Question to the teacher",
-                category: "Teacher",
-                description:
-                    "Why are all teachers in this school alway very severe with students?",
-                upvote: 6,
-                commentList: [],
-            },
-            {
-                id: 1,
-                name: "Myriam",
-                title: "Maths class today",
-                category: "Student",
-                description:
-                    "I just never understood a bit of what the teacher was saying today",
-                upvote: 10,
-                commentList: [
-                    {
-                        id: 1,
-                        name: "Toni",
-                        description: " Me too you",
-                    },
-                    {
-                        id: 2,
-                        name: "Dori",
-                        description: "Yep same here",
-                    },
-                    {
-                        id: 3,
-                        name: "Sam",
-                        description: " I agree with you",
-                    },
-                ],
-            },
-            {
-                id: 2,
-                name: "Mimi",
-                title: "This is for everyone",
-                category: "Everyone",
-                description: "Everyone in this place doesn't care so what should I do?",
-                upvote: 4,
-                commentList: [
-                    {
-                        id: 1,
-                        name: "Kevin",
-                        description: " I agree with you",
-                    },
-                ],
-            },
-            {
-                id: 3,
-                name: "Ornel",
-                title: "Friends",
-                category: "Student",
-                description:
-                    "Why are all teachers in this school alway very severe with us?",
-                upvote: 1,
-                commentList: [
-                    {
-                        id: 1,
-                        name: "Myriam",
-                        description: " I  don't agree with you",
-                    },
-                    {
-                        id: 2,
-                        name: "Toyi",
-                        description: " I agree with you",
-                    },
-                    {
-                        id: 3,
-                        name: "Hide",
-                        description: " I agree with you",
-                    },
-                    {
-                        id: 4,
-                        name: "Men",
-                        description: " I agree with you",
-                    },
-                    {
-                        id: 5,
-                        name: "Karen",
-                        description: " seems quit right for me",
-                    },
-                ],
-            },
-        ],
+        feedbackList: [],
         categoryList: ["Student", "Teacher", "Everyone", "Admin"],
         }),
     actions: {
-        addFeedback( feedback) {
-            this.feedbackList.push(feedback);
+        getAllFeedbacks() {
+            db.collection('feedback').orderBy("createdAt", "desc")
+                .get().then((querySnapshot) => {
+                console.log(querySnapshot);
+                querySnapshot.forEach((doc) => {
+                    this.feedbackList.push({
+                        docId: doc.id,
+                        id: doc.data().id,
+                        email: doc.data().email,
+                        category: doc.data().category,
+                        description: doc.data().description,
+                        name: doc.data().name,
+                        title: doc.data().title,
+                        upvote: doc.data().upvote,
+                        commentList: doc.data().commentList
+                    });
+                });
+            }).catch((error) => {
+                console.log(error);
+            })
         },
-        addComment( comment) {
-            this.feedbackList.forEach((feedback) => {
-                if (feedback.id == comment.id) {
-                    let index = this.feedbackList.indexOf(feedback);
-                    this.feedbackList[index].commentList.push(comment);
-                    console.log(this.feedbackList[index].commentList);
-                }
-            });
+        getFeedbackId: function() {
+            return db.collection('feedback_id').get();
+        },
+        incrementFeedbackId(docId, feedbackId) {
+            db.collection("feedback_id")
+                .doc(docId)
+                .update({
+                    id: feedbackId + 1
+                })
+                .then(() => {
+                    console.log("Document successfully updated!");
+                })
+                .catch((error) => {
+                    console.error("Error updating document: ", error);
+                });
+        },
+        addFeedback( feedback) {
+           // this.feedbackList.push(feedback);
+            db.collection("feedback")
+                .add(feedback)
+                .then((docRef) => {
+                    console.log("Document successfully written!");
+                    return docRef.get();
+                })
+                .then((doc) => {
+                    //prepend object
+                    this.feedbackList.unshift({
+                        docId: doc.id,
+                        id: doc.data().id,
+                        email: doc.data().email,
+                        category: doc.data().category,
+                        description: doc.data().description,
+                        name: doc.data().name,
+                        title: doc.data().title,
+                        upvote: doc.data().upvote,
+                        commentList: doc.data().commentList
+                    });
+                    console.log(this.feedbackList);
+                })
+                .catch((error) => {
+                    console.error("Error writing document: ", error);
+                });
+        },
+        addComment( {currentCommentList, docId, id }) {
+            db.collection("feedback")
+                .doc(docId)
+                .update({
+                    commentList: currentCommentList
+                })
+                .then(() => {
+                    console.log("Document successfully updated!");
+                    this.feedbackList = this.feedbackList.map((feedback) => {
+                        if(feedback.id === id) {
+                            feedback.commentList = currentCommentList;
+                        }
+                        return feedback;
+                    })
+                })
+                .catch((error) => {
+                    console.error("Error updating document: ", error);
+                });
         },
         editFeedback( editData) {
-            this.feedbackList.forEach((feedback) => {
-                if (feedback.id == editData.id) {
-                    let index = this.feedbackList.indexOf(feedback);
-                    this.feedbackList[index].title = editData.title;
-                    this.feedbackList[index].category = editData.category;
-                    this.feedbackList[index].description = editData.description;
-                }
-            });
+            db.collection("feedback")
+                .doc(editData.id)
+                .update({
+                    title: editData.title,
+                    category: editData.category,
+                    description: editData.description
+                })
+                .then(() => {
+                    console.log("Document successfully updated!");
+                    this.feedbackList.forEach((feedback) => {
+                        if(feedback.docId === editData.id) {
+                            let index = this.feedbackList.indexOf(feedback);
+                            this.feedbackList[index].title = editData.title;
+                            this.feedbackList[index].category = editData.category;
+                            this.feedbackList[index].description = editData.description;
+
+                        }
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error updating document: ", error);
+                });
         },
         deleteFeedback( id) {
-            this.feedbackList.forEach((feedback) => {
-                if (feedback.id == id) {
-                    let index = this.feedbackList.indexOf(feedback);
-                    this.feedbackList.splice(index, 1);
-                }
-            });
+                db.collection("feedback")
+                    .doc(id)
+                    .delete()
+                    .then(() => {
+                        console.log("Document successfully deleted!");
+                        this.feedbackList.forEach((feedback) => {
+                            if(feedback.docId === id) {
+                                let index = this.feedbackList.indexOf(feedback);
+                                this.feedbackList.splice(index, 1);
+                            }
+                        })
+                    })
+                    .catch((error) => {
+                        console.error("Error removing document: ", error);
+                    });
         },
-        incrementUpvote( id) {
-            this.feedbackList.forEach((feedback) => {
-                if (feedback.id == id) {
-                    let index = this.feedbackList.indexOf(feedback);
-                    this.feedbackList[index].upvote++;
-                }
-            });
+        incrementUpvote( id, currentUpvote) {
+            db.collection("feedback")
+                .doc(id)
+                .update({
+                    upvote: currentUpvote + 1
+                })
+                .then(() => {
+                    console.log("Document successfully updated!");
+                    this.feedbackList.forEach((feedback) => {
+                        if(feedback.docId === id) {
+                            let index = this.feedbackList.indexOf(feedback);
+                            this.feedbackList[index].upvote += 1;
+                        }
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error updating document: ", error);
+                });
         },
-        decrementUpvote( id) {
-            this.feedbackList.forEach((feedback) => {
-                if (feedback.id == id) {
-                    let index = this.feedbackList.indexOf(feedback);
-                    this.feedbackList[index].upvote--;
-                }
-            });
+        decrementUpvote( id, currentUpvote) {
+            db.collection("feedback")
+                .doc(id)
+                .update({
+                    upvote: currentUpvote - 1
+                })
+                .then(() => {
+                    console.log("Document successfully updated!");
+                    this.feedbackList.forEach((feedback) => {
+                        if(feedback.docId === id) {
+                            let index = this.feedbackList.indexOf(feedback);
+                            this.feedbackList[index].upvote -= 1;
+                        }
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error updating document: ", error);
+                });
         },
     }
 })

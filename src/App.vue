@@ -1,11 +1,11 @@
 <template>
   <div class="app-main">
-    <!--<div id="nav">
-      <router-link to="/about">About</router-link>
-    </div>-->
     <router-view />
   </div>
 </template>
+<script setup>
+
+</script>
 
 <style>
 *, *::before, *::after {
@@ -24,15 +24,19 @@
 #nav a.router-link-exact-active {
   color: #42b983;
 }
-.app-main {
-  min-height: 100vh;
-  background: #F2F4FF;
-  padding-top: 3em;
-}
+
+
 @media only screen and (max-width: 520px) {
   .app-main {
     background: #F2F4FF;
     margin-top:0px;
+  }
+}
+@media only screen and (min-width: 520px) {
+  .app-main {
+    min-height: 100vh;
+    background: #F2F4FF;
+    padding-top: 3em;
   }
 }
 </style>

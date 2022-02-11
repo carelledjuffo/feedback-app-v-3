@@ -21,18 +21,15 @@
     </div>
   </div>
 </template>
-
 <script setup>
 import {useStore} from "../store/store";
 import { defineProps } from "vue";
-
 const store = useStore();
 const props = defineProps([
-    'id'
+  'docId'
 ])
-
 function deleteFeedback() {
-  store.deleteFeedback(props.id);
+  store.deleteFeedback(props.docId);
 }
 </script>
 
