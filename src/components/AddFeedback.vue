@@ -71,12 +71,10 @@ const data = reactive({
 });
 
 
-const dateToday = new Date().toJSON();
-console.log(dateToday)
  function saveFeedback() {
   data.category = data.category ? data.category : 'Everyone';
 
-
+   const dateToday = new Date().toJSON();
   store.getFeedbackId().then((querySnapshot) => {
     let currentFeedbackId = querySnapshot.docs[0].data().id;
     let feedback_idDocId = querySnapshot.docs[0].id;
