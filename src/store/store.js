@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore'
 import firebase from '../firebase/init'
+import moment from 'moment';
 
 
 const db = firebase.firestore();
@@ -14,6 +15,7 @@ export const useStore = defineStore('main', {
     state: () => ({
         feedbackList: [],
         categoryList: ["Student", "Teacher", "Everyone", "Admin"],
+        userName: '',
         }),
     actions: {
         getAllFeedbacks() {
@@ -30,7 +32,8 @@ export const useStore = defineStore('main', {
                         name: doc.data().name,
                         title: doc.data().title,
                         upvote: doc.data().upvote,
-                        commentList: doc.data().commentList
+                        commentList: doc.data().commentList,
+                        date: doc.data().date
                     });
                 });
             }).catch((error) => {
@@ -72,7 +75,8 @@ export const useStore = defineStore('main', {
                         name: doc.data().name,
                         title: doc.data().title,
                         upvote: doc.data().upvote,
-                        commentList: doc.data().commentList
+                        commentList: doc.data().commentList,
+                        date: doc.data().date
                     });
                     console.log(this.feedbackList);
                 })
@@ -115,6 +119,7 @@ export const useStore = defineStore('main', {
                             this.feedbackList[index].title = editData.title;
                             this.feedbackList[index].category = editData.category;
                             this.feedbackList[index].description = editData.description;
+                            this.this.feedbackList[index].date = moment(new Date());
 
                         }
                     });
@@ -178,5 +183,28 @@ export const useStore = defineStore('main', {
                     console.error("Error updating document: ", error);
                 });
         },
+        storeUser(user) {
+            db.collection("users")
+                .add(user)
+                .then((docRef) => {
+                    console.log("Document successfully written!");
+                    return docRef.get();
+                })
+                .then((doc) => {
+                    //prepend object
+                    this.userList.push({
+                        docId: doc.id,
+                        email: doc.data().email,
+                        name: doc.data().name,
+                    });
+                    console.log(this.userList);
+                })
+                .catch((error) => {
+                    console.error("Error writing document: ", error);
+                });
+        },
+       getUserName() {
+           return db.collection('users').get();
+       }
     }
 })

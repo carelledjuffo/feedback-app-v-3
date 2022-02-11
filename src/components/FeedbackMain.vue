@@ -57,7 +57,6 @@
                 <input v-model="data.searchingWord" @mousedown="data.classify=6" placeholder="search">
               </div>
               <div class="add-and-logout">
-                <AddFeedback >Add</AddFeedback>
                 <div>
                   <button class="btn btn-log-out" @click="logOut">
                     <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="red" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
@@ -73,7 +72,17 @@
             <button class="navbar-toggler"  type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
             </button>
-            <p class="comment-amount">{{ sortedList.length }} Suggestions</p>
+            <AddFeedback >Add</AddFeedback>
+            <span class="comment-amount">
+              <span class="comment-amount-message">
+                 {{ sortedList.length }}
+              </span>
+              <span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-envelope-paper" viewBox="0 0 16 16">
+                  <path d="M4 0a2 2 0 0 0-2 2v1.133l-.941.502A2 2 0 0 0 0 5.4V14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5.4a2 2 0 0 0-1.059-1.765L14 3.133V2a2 2 0 0 0-2-2H4Zm10 4.267.47.25A1 1 0 0 1 15 5.4v.817l-1 .6v-2.55Zm-1 3.15-3.75 2.25L8 8.917l-1.25.75L3 7.417V2a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v5.417Zm-11-.6-1-.6V5.4a1 1 0 0 1 .53-.882L2 4.267v2.55Zm13 .566v5.734l-4.778-2.867L15 7.383Zm-.035 6.88A1 1 0 0 1 14 15H2a1 1 0 0 1-.965-.738L8 10.083l6.965 4.18ZM1 13.116V7.383l4.778 2.867L1 13.117Z"/>
+                </svg>
+              </span>
+            </span>
           </nav>
         </div>
       </div>
@@ -103,6 +112,7 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import { useStore } from "../store/store";
 import { reactive, computed} from "vue";
+
 
 
 const store = useStore();
@@ -210,6 +220,9 @@ function logOut() {
 <style scoped>
 #app {
 }
+.main-content {
+
+}
 .comment-header {
   height: 80px;
   min-width: 100%;
@@ -232,6 +245,8 @@ function logOut() {
 }
 .comment-amount {
   font-weight: 630;
+  display: flex;
+  justify-content: space-around;
 }
 .comment-header > p {
   font-size: 1em;
@@ -283,10 +298,11 @@ function logOut() {
 }
 .add-and-logout {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
 }
 .btn-log-out {
   margin-top: 0.7em;
+  align-self: end;
 }
 /**************** mobile ****************/
 .bg-dark {
@@ -295,6 +311,13 @@ function logOut() {
 }
 .btn {
   box-shadow: none;
+}
+.btn-sort:hover {
+  color: #ad1fea;
+}
+.comment-amount-message {
+  margin-right: 0.5em;
+  font-size: 18px;
 }
 @media only screen and (max-width: 1200px) {
   .main-content {

@@ -24,8 +24,8 @@
       </div>
       <div class="feedback-part-noVotes">
         <div class="fb-body">
-          <div class="fb-title">
-            <p>{{ props.feedback.title }}</p>
+          <div class="fb-title-duration">
+            <p class="fb-title">{{ props.feedback.title }}</p>
           </div>
           <div class="fb-description">
             <p>{{ props.feedback.description }}</p>
@@ -36,6 +36,9 @@
             </button>
             <button class="fb-name">
               <span>{{ props.feedback.name }}</span>
+            </button>
+            <button class=" btn fb-duration">
+              <span>{{ feedbackDuration}}</span>
             </button>
           </div>
         </div>
@@ -80,6 +83,7 @@
 import { computed, defineProps } from "vue";
 import { useStore } from "../store/store";
 import { useRoute } from 'vue-router';
+import moment from 'moment';
 
 const route = useRoute();
 const props = defineProps([
@@ -90,6 +94,14 @@ const isHome = computed(() => {
   return route.path === '/home';
 })
 
+
+const feedbackDuration = computed(() => {
+  const dateOfFeedbackCreation = moment(props.feedback.date);
+  return moment(dateOfFeedbackCreation).fromNow();
+})
+console.log(props.feedback.date)
+
+console.log(feedbackDuration.value);
 
 const isOwner = computed(() => {
   return props.feedback.email === localStorage.getItem('email');
@@ -141,7 +153,7 @@ function decrementUpvote() {
   flex-flow: column;
   align-items: flex-start;
 }
-.fb-name{
+.fb-name, fb-duration{
   background: #f2f4ff;
   color:#ad1fea;
   border-radius: 0.3em;
@@ -196,6 +208,12 @@ function decrementUpvote() {
 .btn-delete > svg {
   color: #3a4374;
 }
+.fb-duration {
+  font-size: 15px;
+  font-style: italic;
+  color: #3a4374;
+}
+
 @media only screen and (max-width: 750px) {
   .fb-body {
     flex: 0 0 55%;
@@ -250,6 +268,10 @@ function decrementUpvote() {
   }
   .btn-edit {
     flex: 0 0 1%;
+  }
+  .fb-duration {
+    font-size: 10px;
+    font-style: italic;
   }
 
 }

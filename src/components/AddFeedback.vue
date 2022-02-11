@@ -70,26 +70,39 @@ const data = reactive({
   categoryList: store.categoryList,
 });
 
-function saveFeedback() {
+
+const dateToday = new Date().toJSON();
+console.log(dateToday)
+ function saveFeedback() {
   data.category = data.category ? data.category : 'Everyone';
 
+
   store.getFeedbackId().then((querySnapshot) => {
-    let currentFeedbackId  = querySnapshot.docs[0].data().id;
+    let currentFeedbackId = querySnapshot.docs[0].data().id;
     let feedback_idDocId = querySnapshot.docs[0].id;
-    let feedback = {
-      id: currentFeedbackId,
-      name: localStorage.getItem('name'),
-      email: localStorage.getItem('email'),
-      title: data.title,
-      category: data.category,
-      description: data.description,
-      upvote: 0,
-      commentList: [],
-      createdAt: timestamp()
-    };
-    store.addFeedback(feedback);
-    store.incrementFeedbackId(feedback_idDocId, currentFeedbackId)
-    clear();
+    store.getUserName().then((querySnapshotForName) => {
+      querySnapshotForName.forEach((doc) => {
+        if(doc.data().email === localStorage.getItem('email')) {
+          store.userName = doc.data().name;
+        }
+      })
+      let feedback = {
+        id: currentFeedbackId,
+        name: store.userName,
+        email: localStorage.getItem('email'),
+        title: data.title,
+        category: data.category,
+        description: data.description,
+        upvote: 0,
+        commentList: [],
+        createdAt: timestamp(),
+        date: dateToday
+      };
+      store.addFeedback(feedback);
+      store.incrementFeedbackId(feedback_idDocId, currentFeedbackId)
+      clear();
+
+    })
   })
 
 }
@@ -149,12 +162,11 @@ select option:hover {
 .add-btn:hover {
   color: white;
 }
-@media only screen and (max-width: 520px) {
+@media only screen and (max-width: 620px) {
   .add-btn  {
     display: flex;
     flex-flow: row;
-    margin-top: 0px;
-    margin-bottom: 1em;
+    margin-bottom: 0.6em;
     padding-bottom: 7px;
   }
   .add-btn:before {

@@ -32,8 +32,9 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import {reactive} from "vue";
 import router from "../router";
+import {useStore} from "../store/store";
 
-
+const store = useStore();
 const data = reactive({
   email: '',
   password: '',
@@ -44,9 +45,21 @@ const data = reactive({
  async function signUp() {
   try{
     await firebase.auth().createUserWithEmailAndPassword(data.email, data.password);
+    const user = {
+      email: data.email,
+      name: data.name
+    }
+    store.storeUser(user);
     localStorage.setItem('email', data.email);
-    localStorage.setItem('name', data.name);
     localStorage.setItem('isLoggedIn', 'true')
+    store.getUserName().then((querySnapshotForName) => {
+      querySnapshotForName.forEach((doc) => {
+        if(doc.data().email === localStorage.getItem('email')) {
+          store.userName = doc.data().name;
+        }
+      })
+
+    })
     await router.push('/home');
   } catch (e) {
     data.error = e.message;

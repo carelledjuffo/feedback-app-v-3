@@ -80,7 +80,7 @@ function saveComment() {
   if(data.description) {
     let comment = {
       id:data.feedback.id,
-      name: localStorage.getItem('name'),
+      name: store.userName,
       description: data.description,
     }
     data.feedback.commentList.push(comment);
@@ -203,6 +203,8 @@ form {
   .feedback-comment-main {
     margin-left: 2%;
     margin-right: 2%;
+    padding-top: 2em;
+    padding-bottom: 1em;
   }
 
 }
