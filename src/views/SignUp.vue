@@ -51,15 +51,7 @@ const data = reactive({
     }
     store.storeUser(user);
     localStorage.setItem('email', data.email);
-    localStorage.setItem('isLoggedIn', 'true')
-    store.getUserName().then((querySnapshotForName) => {
-      querySnapshotForName.forEach((doc) => {
-        if(doc.data().email === localStorage.getItem('email')) {
-          store.userName = doc.data().name;
-        }
-      })
-
-    })
+    localStorage.setItem('isLoggedIn', 'true');
     await router.push('/home');
   } catch (e) {
     data.error = e.message;

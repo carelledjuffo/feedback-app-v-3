@@ -3,7 +3,7 @@
     <div class="feedback-comment-header">
       <router-link to="/home" class="btn btn-return">Home</router-link>
       <div class="btn-edit">
-        <button class="btn btn-edit" data-target="#editModal" data-toggle="modal">
+        <button class="btn btn-edit" data-target="#editModal" data-toggle="modal" :disabled="isOwner">
           Edit Feedback
         </button>
       </div>
@@ -49,7 +49,7 @@
 import FeedbackDisplay from "../components/FeedbackDisplay";
 import DeleteFeedback from "../components/DeleteFeedback";
 import EditFeedback from "../components/EditFeedback";
-import { reactive } from "vue";
+import {computed, reactive} from "vue";
 import { useRoute } from 'vue-router';
 import {useStore} from "../store/store";
 
@@ -68,30 +68,41 @@ const data = reactive({
   },
 })
 /****** initializing feedback ****/
-
+const currentUserEmail = localStorage.getItem('email');
 store.feedbackList.forEach((feedback) => {
   if(feedback.id === data.feedbackId) {
     data.feedback = feedback;
   }
 });
-console.log(store.userName);
+const isOwner = computed(() => {
+  return data.feedback.email === currentUserEmail;
+})
+
+
 function saveComment() {
   validation();
-  if(data.description) {
-    let comment = {
-      id:data.feedback.id,
-      name: store.userName,
-      description: data.description,
-    }
-    data.feedback.commentList.push(comment);
-    let addData = {
-      currentCommentList: data.feedback.commentList,
-      docId: data.feedback.docId,
-      id: data.feedbackId
-    }
-    store.addComment(addData);
-    clear();
-  }
+  store.getUserName().then((querySnapshotForName) => {
+    querySnapshotForName.forEach((doc) => {
+      if(doc.data().email === localStorage.getItem('email')) {
+        let userName = doc.data().name;
+        if(data.description) {
+          let comment = {
+            id:data.feedback.id,
+            name: userName,
+            description: data.description,
+          }
+          data.feedback.commentList.push(comment);
+          let addData = {
+            currentCommentList: data.feedback.commentList,
+            docId: data.feedback.docId,
+            id: data.feedbackId
+          }
+          store.addComment(addData);
+          clear();
+        }
+      }
+    })
+  })
 }
 
 function validation() {
