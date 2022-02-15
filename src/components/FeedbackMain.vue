@@ -2,7 +2,10 @@
   <div class="main-content">
     <div class="comment-main-display">
       <div class="comment-header" v-if="!isMobile">
-        <p class="comment-amount">{{ sortedList.length }} Suggestions</p>
+        <div class="app-name-field">
+          <p class="app-name">CDFeeds</p>
+        </div>
+        <p class="comment-amount">{{ sortedList.length }} Feeds</p>
         <div class="dropdown">
           <button class="btn btn-sort dropdown-toggle"
                   type="button" id="dropdownMenuButton"
@@ -31,9 +34,6 @@
           </button>
         </div>
       </div>
-
-
-
       <div class="comment-header-mobile" v-if="isMobile">
         <div class="pos-f-t">
           <div class="collapse" id="navbarToggleExternalContent">
@@ -69,9 +69,7 @@
             </div>
           </div>
           <nav class="navbar navbar-dark bg-dark">
-            <button class="navbar-toggler"  type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
-              <span class="navbar-toggler-icon"></span>
-            </button>
+            <p class="app-name-mobile">CDFeeds</p>
             <AddFeedback >Add</AddFeedback>
             <span class="comment-amount">
               <span class="comment-amount-message">
@@ -83,6 +81,9 @@
                 </svg>
               </span>
             </span>
+            <button class="navbar-toggler"  type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
           </nav>
         </div>
       </div>
@@ -120,6 +121,7 @@ const store = useStore();
 if(!store.feedbackList.length) {
   store.getAllFeedbacks();
 }
+console.log(store.feedbackList)
 
 const data = reactive({
   classify: 1,
@@ -319,11 +321,28 @@ function logOut() {
   margin-right: 0.5em;
   font-size: 18px;
 }
+.app-name {
+  font-style: italic;
+  font-weight: bolder;
+  font-size: 20px;
+}
+.app-name-field {
+  margin: 1.1em 5em 0em 0em;
+}
+.app-name-mobile {
+  font-style: italic;
+  font-weight: bolder;
+  margin: 0.2em 1em 0em 0em;
+}
 @media only screen and (max-width: 1200px) {
   .main-content {
     margin-left: 10%;
     margin-right: 10%;
   }
+  .app-name-field {
+    margin: 1.2em 2em 0em 0em;
+  }
+
 }
 @media only screen and (max-width: 520px) {
   .main-content {

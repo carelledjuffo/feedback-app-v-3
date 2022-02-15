@@ -74,7 +74,7 @@ store.feedbackList.forEach((feedback) => {
     data.feedback = feedback;
   }
 });
-
+console.log(store.userName);
 function saveComment() {
   validation();
   if(data.description) {

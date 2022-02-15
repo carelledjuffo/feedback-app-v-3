@@ -33,7 +33,9 @@ export const useStore = defineStore('main', {
                         title: doc.data().title,
                         upvote: doc.data().upvote,
                         commentList: doc.data().commentList,
-                        date: doc.data().date
+                        date: doc.data().date,
+                        upVoters: doc.data().upVoters,
+                        downVoters: doc.data().downVoters
                     });
                 });
             }).catch((error) => {
@@ -76,7 +78,9 @@ export const useStore = defineStore('main', {
                         title: doc.data().title,
                         upvote: doc.data().upvote,
                         commentList: doc.data().commentList,
-                        date: doc.data().date
+                        date: doc.data().date,
+                        upVoters: doc.data().upVoters,
+                        downVoters: doc.data().downVoters
                     });
                     console.log(this.feedbackList);
                 })
@@ -205,6 +209,87 @@ export const useStore = defineStore('main', {
         },
        getUserName() {
            return db.collection('users').get();
-       }
+       },
+        addUpVoter(docId, currentUpVoterList, currentUserEmail) {
+            currentUpVoterList.push(currentUserEmail)
+            db.collection("feedback")
+                .doc(docId)
+                .update({
+                    upVoters: currentUpVoterList
+                })
+                .then(() => {
+                    console.log("Document successfully updated!");
+                    this.feedbackList.forEach((feedback) => {
+                        if(feedback.docId === docId) {
+                            let index = this.feedbackList.indexOf(feedback);
+                            this.feedbackList[index].upVoters = currentUpVoterList;
+                        }
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error updating document: ", error);
+                });
+        },
+        addDownVoter(docId, currentDownVoterList, currentUserEmail) {
+            currentDownVoterList.push(currentUserEmail)
+            db.collection("feedback")
+                .doc(docId)
+                .update({
+                    downVoters: currentDownVoterList
+                })
+                .then(() => {
+                    console.log("Document successfully updated!");
+                    this.feedbackList.forEach((feedback) => {
+                        if(feedback.docId === docId) {
+                            let index = this.feedbackList.indexOf(feedback);
+                            this.feedbackList[index].downVoters = currentDownVoterList;
+                        }
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error updating document: ", error);
+                });
+        },
+        removeUpVoter(docId, upVoterIndex, currentUpVoterList ) {
+            currentUpVoterList.splice(upVoterIndex, 1);
+            db.collection("feedback")
+                .doc(docId)
+                .update({
+                    upVoters: currentUpVoterList
+                })
+                .then(() => {
+                    console.log("Document successfully updated!");
+                    this.feedbackList.forEach((feedback) => {
+                        if(feedback.docId === docId) {
+                            let index = this.feedbackList.indexOf(feedback);
+                            this.feedbackList[index].upVoters = currentUpVoterList;
+                        }
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error updating document: ", error);
+                });
+        },
+        removeDownVoter(docId, downVoterIndex, currentDownVoterList ) {
+            currentDownVoterList.splice(downVoterIndex, 1);
+
+            db.collection("feedback")
+                .doc(docId)
+                .update({
+                    downVoters: currentDownVoterList
+                })
+                .then(() => {
+                    console.log("Document successfully updated!");
+                    this.feedbackList.forEach((feedback) => {
+                        if(feedback.docId === docId) {
+                            let index = this.feedbackList.indexOf(feedback);
+                            this.feedbackList[index].downVoters = currentDownVoterList;
+                        }
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error updating document: ", error);
+                });
+        }
     }
 })

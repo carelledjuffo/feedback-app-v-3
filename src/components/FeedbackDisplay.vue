@@ -4,8 +4,9 @@
       <div class="fb-upvote">
         <span class="btn upvote-btn" >
           <span class="arrow-up" @click="incrementUpvote">
-           <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                height="16" fill="currentColor"
+           <svg xmlns="http://www.w3.org/2000/svg" :width="upVotedSize"
+                :height="upVotedSize"
+                :fill="upVotedColor"
                 class="bi bi-chevron-up"
                 viewBox="0 0 16 16">
            <path fill-rule="evenodd"
@@ -14,8 +15,8 @@
            </span>
          <span> {{ props.feedback.upvote }} </span>
           <span class="arrow-down" @click="decrementUpvote">
-           <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                height="16" fill="currentColor"
+           <svg xmlns="http://www.w3.org/2000/svg" :width="downVotedSize"
+                :height="downVotedSize" :fill="downVotedColor"
                 class="bi bi-chevron-down" viewBox="0 0 16 16">
            <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
            </svg>
@@ -93,25 +94,62 @@ const store = useStore();
 const isHome = computed(() => {
   return route.path === '/home';
 })
-
+const currentUserEmail = localStorage.getItem('email');
 
 const feedbackDuration = computed(() => {
   const dateOfFeedbackCreation = moment(props.feedback.date);
   return moment(dateOfFeedbackCreation).fromNow();
 })
-console.log(props.feedback.date)
-
-console.log(feedbackDuration.value);
-
 const isOwner = computed(() => {
-  return props.feedback.email === localStorage.getItem('email');
+  return props.feedback.email === currentUserEmail ||
+      currentUserEmail === 'admin@admin.com';
+})
+const upVotedSize = computed(() => {
+  return userHasUpVotedFeedback.value ? 22 : 16;
+})
+const downVotedSize = computed(() => {
+  return userHasDownVotedFeedback.value ? 20 : 16;
+})
+const upVotedColor = computed(() => {
+  return userHasUpVotedFeedback.value ? '#ad1fea' : 'currentColor';
+})
+const downVotedColor = computed(() => {
+  return userHasDownVotedFeedback.value ? '#ad1fea' : 'currentColor';
+})
+const userHasUpVotedFeedback = computed(() => {
+  return props.feedback.upVoters.includes(currentUserEmail);
+})
+const userHasDownVotedFeedback = computed(() => {
+  return props.feedback.downVoters.includes(currentUserEmail);
 })
 
 function incrementUpvote() {
-  store.incrementUpvote(props.feedback.docId, props.feedback.upvote)
+  if(userHasUpVotedFeedback.value) {
+    console.log('Already upvoted')
+  } else {
+    if(userHasDownVotedFeedback.value) {
+      console.log("must reverse")
+      let downVoterIndex = props.feedback.downVoters.indexOf(currentUserEmail);
+      store.removeDownVoter(props.feedback.docId, downVoterIndex, props.feedback.downVoters)
+    }
+    store.incrementUpvote(props.feedback.docId, props.feedback.upvote);
+    store.addUpVoter(props.feedback.docId, props.feedback.upVoters, currentUserEmail);
+  }
+
 }
 function decrementUpvote() {
-  store.decrementUpvote(props.feedback.docId, props.feedback.upvote)
+  if(userHasDownVotedFeedback.value) {
+    console.log('Already downvoted')
+  } else {
+    if(userHasUpVotedFeedback.value) {
+      let upVoterIndex = props.feedback.upVoters.indexOf(currentUserEmail);
+      store.removeUpVoter(props.feedback.docId, upVoterIndex, props.feedback.upVoters)
+
+    }
+    store.decrementUpvote(props.feedback.docId, props.feedback.upvote);
+    store.addDownVoter(props.feedback.docId, props.feedback.downVoters, currentUserEmail);
+  }
+
 }
 
 </script>

@@ -71,10 +71,10 @@ const data = reactive({
 });
 
 
- function saveFeedback() {
+function saveFeedback() {
   data.category = data.category ? data.category : 'Everyone';
 
-   const dateToday = new Date().toJSON();
+  const dateToday = new Date().toJSON();
   store.getFeedbackId().then((querySnapshot) => {
     let currentFeedbackId = querySnapshot.docs[0].data().id;
     let feedback_idDocId = querySnapshot.docs[0].id;
@@ -94,7 +94,9 @@ const data = reactive({
         upvote: 0,
         commentList: [],
         createdAt: timestamp(),
-        date: dateToday
+        date: dateToday,
+        upVoters: [],
+        downVoters: []
       };
       store.addFeedback(feedback);
       store.incrementFeedbackId(feedback_idDocId, currentFeedbackId)
@@ -102,7 +104,6 @@ const data = reactive({
 
     })
   })
-
 }
 
 function clear() {
