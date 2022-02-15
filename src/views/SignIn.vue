@@ -1,6 +1,9 @@
 <template>
   <div class="about-main">
     <div class="about">
+      <div class="app-name-field">Welcome to
+        <span class="app-name">CDFeeds</span>
+      </div>
       <div class="login-image">
         <img src="https://cdn0.iconfinder.com/data/icons/set-ui-app-android/32/8-512.png" width="150" alt="">
       </div>
@@ -88,6 +91,15 @@ async function signIn() {
 }
 .btn {
   box-shadow: none;
+}
+.app-name-field {
+  text-align: center;
+  margin-bottom: 1.5em;
+}
+.app-name {
+  color: #ad1fea;
+  font-weight: bolder;
+  font-style: italic;
 }
 
 @media only screen and (min-width: 500px) {
