@@ -18,6 +18,7 @@
             <a class="dropdown-item" @click="data.classify=2">Least Upvotes</a>
             <a class="dropdown-item" @click="data.classify=3">Most Comments</a>
             <a class="dropdown-item" @click="data.classify=4">Least Comments</a>
+            <a class="dropdown-item" @click="data.classify=0">No filter</a>
             <input placeholder="category" class="input-category" @mouseleave="data.classify=5" v-model="data.category">
           </div>
         </div>
@@ -50,6 +51,7 @@
                   <a class="dropdown-item" @click="data.classify=2">Least Upvotes</a>
                   <a class="dropdown-item" @click="data.classify=3">Most Comments</a>
                   <a class="dropdown-item" @click="data.classify=4">Least Comments</a>
+                  <a class="dropdown-item" @click="data.classify=0">No filter</a>
                   <input placeholder="category" class="input-category" @mouseleave="data.classify=5" v-model="data.category">
                 </div>
               </div>
@@ -131,6 +133,9 @@ const data = reactive({
   searchingWord: '',
 })
 const sortingMessage = computed(() => {
+if(data.classify === 0) {
+  return 'No filter'
+}
   if(data.classify === 1) {
     return 'Most Upvotes'
   }
@@ -152,6 +157,9 @@ const sortingMessage = computed(() => {
   }
 })
 const sortedList = computed(() => {
+if(data.classify === 0) {
+  return data.fbl;
+}
   if(data.classify == 1) {
     return sortByVotes('dsc');
   } if(data.classify == 2) {

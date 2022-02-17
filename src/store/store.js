@@ -218,11 +218,10 @@ export const useStore = defineStore('main', {
                     upVoters: currentUpVoterList
                 })
                 .then(() => {
-                    console.log("Document successfully updated!");
                     this.feedbackList.forEach((feedback) => {
                         if(feedback.docId === docId) {
-                            let index = this.feedbackList.indexOf(feedback);
-                            this.feedbackList[index].upVoters = currentUpVoterList;
+                            let i = this.feedbackList.indexOf(feedback);
+                            this.feedbackList[i].upVoters = currentUpVoterList;
                         }
                     });
                 })
